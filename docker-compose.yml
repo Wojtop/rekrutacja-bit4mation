@@ -6,7 +6,7 @@ services:
     ports:
       - "9001:9001"
     volumes:
-      - /opt/database
+      - ./dbdata:/opt/database
     env_file:
       - docker-compose.env
     labels:

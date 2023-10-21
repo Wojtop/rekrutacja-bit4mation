@@ -1,14 +1,18 @@
 version: '3.7'
 services:
   tree-db:
-    image: blacklabelops/hsqldb
+    image: postgres
     container_name: tree-db
+#    ports:
+#      - "9001:9001"
     ports:
-      - "9001:9001"
-    volumes:
-      - ./dbdata:/opt/database
-    env_file:
-      - docker-compose.env
-    labels:
-      com.blacklabelops.description: "HSQL Development System"
-      com.blacklabelops.service: "hsqldb-server"
+      - "5432:5432"
+#    volumes:
+#      - ./dbdata:/opt/database
+    environment:
+      POSTGRES_PASSWORD: mysecretpassword
+#    env_file:
+#      - docker-compose.env
+#    labels:
+#      com.blacklabelops.description: "HSQL Development System"
+#      com.blacklabelops.service: "hsqldb-server"

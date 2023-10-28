@@ -24,7 +24,7 @@ const renderRectSvgNode = ({ nodeDatum, toggleNode }) => (
   </g>
 );
 
-const orgChartJson = [{
+const orgChartJson = {
   name: 'CEO',
   children: [
     {
@@ -58,46 +58,28 @@ const orgChartJson = [{
       ],
     },
   ],
-},
-{
-  name: 'CEO2',
-  children: [
-    {
-      name: 'Manager',
-      attributes: {
-        department: 'Production',
-      },
-      children: [
-        {
-          name: 'Foreman',
-          attributes: {
-            department: 'Fabrication',
-          },
-          children: [
-            {
-              name: 'Worker',
-            },
-          ],
-        },
-        {
-          name: 'Foreman',
-          attributes: {
-            department: 'Assembly',
-          },
-          children: [
-            {
-              name: 'Worker',
-            },
-          ],
-        },
-      ],
-    },
-  ],
-}
-];
+};
 
 export default function App() {
   const [translate, containerRef] = useCenteredTree();
+
+  fetch('http://localhost:8080/tree/getTree') 
+  .then(response => { 
+    if (response.ok) { 
+      return response.json(); // Parse the response data as JSON 
+    } else { 
+      throw new Error('API request failed'); 
+    } 
+  }) 
+  .then(data => { 
+    // Process the response data here 
+    console.log(data); // Example: Logging the data to the console 
+  }) 
+  .catch(error => { 
+    // Handle any errors here 
+    console.error(error); // Example: Logging the error to the console 
+  });
+
   return (
     <div style={containerStyles} ref={containerRef}>
       <Tree

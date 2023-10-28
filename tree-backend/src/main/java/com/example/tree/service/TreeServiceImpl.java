@@ -63,18 +63,6 @@ public class TreeServiceImpl implements TreeService {
         return connectionRepository.findByChildId(childId);
     }
 
-//    @Override
-//    public Connection updateParent(Connection updatedConnection, int newParentId) {
-//        Optional<Node> newParent = nodeRepository.findById(updatedConnection.getParent().getId());
-//        newParent.ifPresentOrElse(parent -> {
-//                    updatedConnection.setParent(parent);
-//                    retuconnectionRepository.save(updatedConnection);
-//                }
-//                , () ->
-//                {
-////                                todo brak nowego rodzica
-//                });
-//    }
 
     @Override
     public Optional<Node> findNodeById(int id) {

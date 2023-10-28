@@ -3,7 +3,6 @@ package com.example.tree.rest;
 import com.example.tree.entieties.Connection;
 import com.example.tree.entieties.Node;
 import com.example.tree.service.TreeService;
-import jdk.jfr.ContentType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-
 
 @RestController
 @RequestMapping("tree")
@@ -24,29 +21,6 @@ public class TreeController {
 
     public TreeController(@Autowired TreeService service) {
         this.service = service;
-    }
-
-    @GetMapping("/test")
-    public void test() {
-//        Node parent = Node.builder().value(10).build();
-//        parent = service.save(parent);
-//
-//        Node child = Node.builder().value(11).build();
-//        child = service.save(child);
-//
-//        Connection conn = new Connection();
-//        conn.setChild(child);
-//        conn.setParent(parent);
-//        conn = service.save(conn);
-//
-//
-//        log.info("Child before save: {}", child.toString());
-//        child = service.save(child);
-//        log.info("Child after save: {}", child.toString());
-//
-//        log.info("Connection after save: {}", conn.toString());
-        log.info("Children of 3: {}", service.findAllChildren(3).toString());
-
     }
 
     @GetMapping(value = "getTree", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -65,7 +39,7 @@ public class TreeController {
                 Connection newConnection = new Connection(parentNode, finalNewNode);
                 newConnection = service.save(newConnection);
             }), () -> {
-//                TODO obsluga bledu brak rodzica
+                throw new TreeException("Parent node does not exists. Check your tree on refreshed values");
             });
 
         }
@@ -76,14 +50,15 @@ public class TreeController {
     public ResponseEntity<TreeResponse> editNode(@RequestBody TreeRequest request) {
         Node requestNode = Node.builder().value(request.value()).id(request.nodeId()).build();
 
-//        todo - łapanie błędu gdy node już nie istnieje
+        // check if node still exists
+        service.findById(request.nodeId()).orElseThrow(() -> {
+            throw new TreeException("Node no longer exists. Check refreshed tree");
+        });
         requestNode = service.save(requestNode);
 
-        if (request.parentId() == null){
-
+        if (request.parentId() == null) {
             service.makeNodeRoot(request.nodeId());
-        }
-        else{
+        } else {
             Optional<Connection> relation = service.findChildByChildId(request.nodeId());
             relation.ifPresentOrElse(
                     (connection -> {
@@ -92,21 +67,20 @@ public class TreeController {
                             newParent.ifPresentOrElse(parent -> {
                                 connection.setParent(parent);
                                 service.save(connection);
-                            }, ()->{
-//                                todo brak nowego rodzica
+                            }, () -> {
+                                throw new TreeException("New parent node does not exists. Check refreshed tree");
                             });
-
-
                         }
                     }), () -> {
-//                    TODO - brak rodzicaconnection
+                        throw new TreeException("Parent node does not exists. Check refreshed tree");
                     }
             );
         }
         return new ResponseEntity<>(buildResponse(), HttpStatus.OK);
     }
+
     @DeleteMapping("/deleteNode/{id}")
-    public ResponseEntity<TreeResponse> deleteNode(@PathVariable int id){
+    public ResponseEntity<TreeResponse> deleteNode(@PathVariable int id) {
 
         service.deleteNode(id);
 
@@ -120,21 +94,4 @@ public class TreeController {
                 .leafs(service.sumAllPaths())
                 .build();
     }
-
-//    @GetMapping("/deleteNode/{id}")
-//    public Set<Node> deleteNode(@PathVariable("id") int id) {
-//        service.deleteById(id);
-//        return service.findAllTrees();
-//    }
-//
-//    @PostMapping("/updateNode")
-//    public Set<Node> updateNode(Node updated){
-//        service.update(updated);
-//        return service.findAllTrees();
-//    }
-//    @GetMapping(value = "/getTrees", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public Set<Node> getTrees(){
-//        return service.findAllTrees();
-//    }
-
 }

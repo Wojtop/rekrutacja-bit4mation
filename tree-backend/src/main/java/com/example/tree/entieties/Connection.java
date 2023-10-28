@@ -18,7 +18,7 @@ public class Connection {
     @ManyToOne
 //    @JoinColumn( name = "id",nullable = true)
     private Node parent = null;
-    @OneToOne
+    @OneToOne(cascade =CascadeType.REMOVE, orphanRemoval = true)
     private Node child = null;
 
     public Connection(Node parent, Node child){

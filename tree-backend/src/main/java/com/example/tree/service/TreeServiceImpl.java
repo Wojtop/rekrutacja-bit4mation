@@ -4,6 +4,7 @@ import com.example.tree.entieties.Connection;
 import com.example.tree.entieties.Node;
 import com.example.tree.repositories.ConnectionRepository;
 import com.example.tree.repositories.NodeRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
+@Transactional
 public class TreeServiceImpl implements TreeService {
     private final NodeRepository nodeRepository;
     private final ConnectionRepository connectionRepository;
@@ -57,6 +59,50 @@ public class TreeServiceImpl implements TreeService {
     }
 
     @Override
+    public Optional<Connection> findChildByChildId(int childId) {
+        return connectionRepository.findByChildId(childId);
+    }
+
+//    @Override
+//    public Connection updateParent(Connection updatedConnection, int newParentId) {
+//        Optional<Node> newParent = nodeRepository.findById(updatedConnection.getParent().getId());
+//        newParent.ifPresentOrElse(parent -> {
+//                    updatedConnection.setParent(parent);
+//                    retuconnectionRepository.save(updatedConnection);
+//                }
+//                , () ->
+//                {
+////                                todo brak nowego rodzica
+//                });
+//    }
+
+    @Override
+    public Optional<Node> findNodeById(int id) {
+        return nodeRepository.findById(id);
+    }
+
+    @Override
+    public void makeNodeRoot(int nodeId) {
+        connectionRepository.deleteByChildId(nodeId);
+    }
+
+    @Override
+    public void deleteNode(int nodeId) {
+        Set<Connection> nodeChildren = connectionRepository.findAllByParentId(nodeId);
+        if(nodeChildren.isEmpty()){
+            connectionRepository.deleteByChildId(nodeId);
+            nodeRepository.deleteById(nodeId);
+            return;
+        }
+
+        for(Connection child: nodeChildren){
+            deleteNode(child.getChild().getId());
+        }
+        connectionRepository.deleteByChildId(nodeId);
+        nodeRepository.deleteById(nodeId);
+    }
+
+    @Override
     public Set<Connection> findAllChildren(int parentId) {
         return connectionRepository.findAllByParentId(parentId);
     }
@@ -78,7 +124,7 @@ public class TreeServiceImpl implements TreeService {
         Map<Integer, Integer> result = new HashMap<>();
         for (Node root : roots) {
             List<Leaf> sums = sumChildren(root);
-            for(Leaf l : sums){
+            for (Leaf l : sums) {
                 result.put(l.lastChildId, l.sum);
             }
         }
@@ -104,39 +150,5 @@ public class TreeServiceImpl implements TreeService {
             return result;
         }
     }
-
-//
-//    @Override
-//    public Iterable<Node> findAll() {
-//        return repository.findAll();
-//    }
-//
-//    @Override
-//    public Set<Node> findAllTrees() {
-//        return repository.findNodesByParentIsNull();
-//    }
-//
-//    @Override
-//    public Node update(Node n) {
-//        Optional<Node> founded = repository.findById(n.getId());
-//        founded.ifPresent((f) -> {
-//            f = n;
-//            f = repository.save(f);
-//        });
-//        return founded.orElse(null);
-//    }
-//
-//    @Override
-//    public Optional<Node> getParent(Node child) {
-//        if (child.getParent() != null) {
-//            return repository.findById(child.getParent().getId());
-//        }
-//        return Optional.empty();
-//    }
-//
-//    @Override
-//    public void deleteById(int id) {
-//        repository.deleteById(id);
-//    }
 
 }

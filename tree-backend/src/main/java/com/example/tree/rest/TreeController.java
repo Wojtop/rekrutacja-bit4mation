@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 
@@ -48,13 +50,8 @@ public class TreeController {
     }
 
     @GetMapping(value = "getTree", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TreeResponse> getTree(){
-        TreeResponse response = TreeResponse.builder()
-                .references(service.findAll())
-                .relations(service.getAllRelations())
-                .leafs(service.sumAllPaths())
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<TreeResponse> getTree() {
+        return new ResponseEntity<>(buildResponse(), HttpStatus.OK);
     }
 
     @PostMapping(value = "/addNode", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -65,20 +62,63 @@ public class TreeController {
         if (request.parentId() != null) {
             Node finalNewNode = newNode;
             service.findById(request.parentId()).ifPresentOrElse((parentNode -> {
-                Connection newConnection = new Connection(parentNode , finalNewNode);
+                Connection newConnection = new Connection(parentNode, finalNewNode);
                 newConnection = service.save(newConnection);
-            }),()->{
+            }), () -> {
 //                TODO obsluga bledu brak rodzica
             });
 
         }
+        return new ResponseEntity<>(buildResponse(), HttpStatus.CREATED);
+    }
 
-        TreeResponse response = TreeResponse.builder()
+    @PostMapping(value = "/editNode", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<TreeResponse> editNode(@RequestBody TreeRequest request) {
+        Node requestNode = Node.builder().value(request.value()).id(request.nodeId()).build();
+
+//        todo - łapanie błędu gdy node już nie istnieje
+        requestNode = service.save(requestNode);
+
+        if (request.parentId() == null){
+
+            service.makeNodeRoot(request.nodeId());
+        }
+        else{
+            Optional<Connection> relation = service.findChildByChildId(request.nodeId());
+            relation.ifPresentOrElse(
+                    (connection -> {
+                        if (!Objects.equals(connection.getParent().getId(), request.parentId())) {
+                            Optional<Node> newParent = service.findById(request.parentId());
+                            newParent.ifPresentOrElse(parent -> {
+                                connection.setParent(parent);
+                                service.save(connection);
+                            }, ()->{
+//                                todo brak nowego rodzica
+                            });
+
+
+                        }
+                    }), () -> {
+//                    TODO - brak rodzicaconnection
+                    }
+            );
+        }
+        return new ResponseEntity<>(buildResponse(), HttpStatus.OK);
+    }
+    @DeleteMapping("/deleteNode/{id}")
+    public ResponseEntity<TreeResponse> deleteNode(@PathVariable int id){
+
+        service.deleteNode(id);
+
+        return new ResponseEntity<>(buildResponse(), HttpStatus.OK);
+    }
+
+    private TreeResponse buildResponse() {
+        return TreeResponse.builder()
                 .references(service.findAll())
                 .relations(service.getAllRelations())
                 .leafs(service.sumAllPaths())
                 .build();
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 //    @GetMapping("/deleteNode/{id}")

@@ -22,46 +22,13 @@ public class Node{
     @Column(name = "id")
     private Integer id = null;
 
-    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Node> children = new HashSet<>();
+    private Integer value = 0;
 
-//    @Column(name = "parent_id", nullable = true)
-//    private Integer parentId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name="id")
-    private Node parent = null;
-
-//        @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name="id")
-//    private Integer parent = null;
-    @Getter
-    private Integer value = null;
-
-
-    public Set<Node> getChildren() {
-        if (this.children == null){
-            this.children = new HashSet<>();
-        }
-
-        return this.children;
+    @Override
+    public String toString() {
+        return "Node{" +
+                "id=" + id +
+                ", value=" + value +
+                '}';
     }
-
-    public boolean isRoot() {
-        return this.parent == null;
-    }
-
-    public boolean isLeaf() {
-        return children.isEmpty();
-    }
-
-//    @Override
-//    public String toString() {
-//        return "Node{" +
-//                "id=" + id +
-//                ", children=" + children +
-//                ", parent=" + parent +
-//                ", value=" + value +
-//                '}';
-//    }
 }

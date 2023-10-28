@@ -2,18 +2,21 @@ package com.example.tree.service;
 
 import com.example.tree.entieties.Connection;
 import com.example.tree.entieties.Node;
+import com.example.tree.exceptions.TreeException;
 import com.example.tree.repositories.ConnectionRepository;
 import com.example.tree.repositories.NodeRepository;
+import com.example.tree.rest.TreeRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
-@Transactional
+@Slf4j
 public class TreeServiceImpl implements TreeService {
     private final NodeRepository nodeRepository;
     private final ConnectionRepository connectionRepository;
@@ -23,24 +26,77 @@ public class TreeServiceImpl implements TreeService {
         connectionRepository = connRep;
     }
 
-    public Node save(Node node) {
-        return nodeRepository.save(node);
+    @Override
+    @Transactional
+    public void addNode(TreeRequest request) {
+        Node newNode = Node.builder().value(request.value()).build();
+        newNode = nodeRepository.save(newNode);
+
+        if (request.parentId() != null) {
+            Node finalNewNode = newNode;
+            nodeRepository.findById(request.parentId()).ifPresentOrElse((parentNode -> {
+                Connection newConnection = new Connection(parentNode, finalNewNode);
+                newConnection = connectionRepository.save(newConnection);
+                log.info("New node inserted. Node: {}. Connection: {}", finalNewNode, newConnection);
+            }), () -> {
+                throw new TreeException("Parent node does not exists. Check your tree on refreshed values");
+            });
+
+        }
     }
 
     @Override
-    public Connection save(Connection connection) {
-        return connectionRepository.save(connection);
+    @Transactional
+    public void editNode(TreeRequest request) {
+        Node requestNode = Node.builder().value(request.value()).id(request.nodeId()).build();
+
+        // check if node still exists
+        nodeRepository.findById(request.nodeId()).orElseThrow(() -> {
+            log.error("No such node: {}", request.nodeId());
+            throw new TreeException("Node no longer exists. Check refreshed tree");
+        });
+        requestNode = nodeRepository.save(requestNode);
+        log.info("Node {} updated", requestNode);
+
+        if (request.parentId() == null) {
+            makeNodeRoot(request.nodeId());
+            log.info("Node {} made root", request.nodeId());
+        } else {
+            Optional<Connection> relation = findChildByChildId(request.nodeId());
+            Optional<Node> newParent = nodeRepository.findById(request.parentId());
+            Node finalRequestNode = requestNode;
+            newParent.ifPresentOrElse(parent -> {
+                relation.ifPresentOrElse(rel -> {
+                    rel.setParent(parent);
+                    connectionRepository.save(rel);
+                    log.info("Node {} parent updated in connection: {}", request.nodeId(), rel);
+                }, () -> {
+                    Connection newConnection = new Connection(parent, finalRequestNode);
+                    connectionRepository.save(newConnection);
+                });
+            }, () -> {
+                throw new TreeException("New parent node does not exists. Check refreshed tree");
+            });
+        }
     }
 
     @Override
-    public Optional<Node> findById(int nodeId) {
-        return nodeRepository.findById(nodeId);
-    }
+    @Transactional
+    public void deleteNode(int nodeId) {
+        Set<Connection> nodeChildren = connectionRepository.findAllByParentId(nodeId);
+        if (nodeChildren.isEmpty()) {
+            connectionRepository.deleteByChildId(nodeId);
+            nodeRepository.deleteById(nodeId);
+            log.info("Node {} deleted", nodeId);
+            return;
+        }
 
-    @Override
-    public Iterable<Node> findAll() {
-//        Set extends Collection which extends Iterable - safe casting
-        return nodeRepository.findAll();
+        for (Connection child : nodeChildren) {
+            deleteNode(child.getChild().getId());
+        }
+        connectionRepository.deleteByChildId(nodeId);
+        nodeRepository.deleteById(nodeId);
+        log.info("Node {}: children deleted, node deleted", nodeId);
     }
 
     @Override
@@ -58,39 +114,21 @@ public class TreeServiceImpl implements TreeService {
         return converted;
     }
 
-    @Override
-    public Optional<Connection> findChildByChildId(int childId) {
+    private Optional<Connection> findChildByChildId(int childId) {
         return connectionRepository.findByChildId(childId);
     }
 
 
-    @Override
-    public Optional<Node> findNodeById(int id) {
-        return nodeRepository.findById(id);
-    }
-
-    @Override
-    public void makeNodeRoot(int nodeId) {
+    private void makeNodeRoot(int nodeId) {
         connectionRepository.deleteByChildId(nodeId);
     }
 
     @Override
-    public void deleteNode(int nodeId) {
-        Set<Connection> nodeChildren = connectionRepository.findAllByParentId(nodeId);
-        if(nodeChildren.isEmpty()){
-            connectionRepository.deleteByChildId(nodeId);
-            nodeRepository.deleteById(nodeId);
-            return;
-        }
-
-        for(Connection child: nodeChildren){
-            deleteNode(child.getChild().getId());
-        }
-        connectionRepository.deleteByChildId(nodeId);
-        nodeRepository.deleteById(nodeId);
+    public Iterable<Node> findAll() {
+        return nodeRepository.findAll();
     }
 
-    @Override
+    //    @Override
     public Set<Connection> findAllChildren(int parentId) {
         return connectionRepository.findAllByParentId(parentId);
     }

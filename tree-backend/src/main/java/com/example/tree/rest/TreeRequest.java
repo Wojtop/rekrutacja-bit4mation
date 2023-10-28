@@ -11,9 +11,6 @@ import java.util.Set;
  * @param value    Value of edited/created node
  * @param parentId ID of node parent node.
  *                 <b>NULL</b> if node is new root.
- * @param children Set of unique IDs of node children
  */
-
-//TODO - delete children?
-public record TreeRequest(@Nullable Integer nodeId, @NotNull Integer value,@Nullable Integer parentId, @NotNull Set<Integer> children) {
+public record TreeRequest(@Nullable Integer nodeId, @NotNull Integer value,@Nullable Integer parentId) {
 }

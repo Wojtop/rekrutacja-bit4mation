@@ -7,6 +7,33 @@ services:
       - "5432:5432"
     volumes:
       - ./db-files:/docker-entrypoint-initdb.d
+      - ./db-files/database-data:/var/lib/postgresql/data
 
     environment:
       POSTGRES_PASSWORD: mysecretpassword
+#    networks:
+#      - tree
+
+  tree-backend:
+    build: /tree-backend
+    container_name: tree-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - tree-db
+#    networks:
+#      - tree
+
+  tree-frontend:
+    build: /tree-frontend
+    container_name: tree-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - tree-backend
+#    networks:
+#      - tree
+#networks:
+#  tree:
+
+

@@ -27,3 +27,13 @@ create table connections
 );
 alter table connections
     owner to postgres;
+
+
+INSERT INTO public.nodes (value) VALUES (10);
+INSERT INTO public.nodes (value) VALUES (11);
+INSERT INTO public.nodes (value) VALUES (12);
+INSERT INTO public.nodes (value) VALUES (13);
+INSERT INTO public.nodes (value) VALUES (14);
+INSERT INTO public.nodes (value) VALUES (11);
+INSERT INTO public.nodes (value) VALUES (112);
+INSERT INTO public.nodes (value) VALUES (131);

@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/rekrutacja-bit4mation.iml" filepath="$PROJECT_DIR$/rekrutacja-bit4mation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tree-frontend/tree-frontend.iml" filepath="$PROJECT_DIR$/tree-frontend/tree-frontend.iml" />
     </modules>
   </component>
 </project>

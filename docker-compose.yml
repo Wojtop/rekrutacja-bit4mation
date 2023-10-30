@@ -11,8 +11,8 @@ services:
 
     environment:
       POSTGRES_PASSWORD: mysecretpassword
-#    networks:
-#      - tree
+    networks:
+      - tree-network
 
   tree-backend:
     build: /tree-backend
@@ -21,8 +21,8 @@ services:
       - "8080:8080"
     depends_on:
       - tree-db
-#    networks:
-#      - tree
+    networks:
+      - tree-network
 
   tree-frontend:
     build: /tree-frontend
@@ -31,9 +31,10 @@ services:
       - "3000:3000"
     depends_on:
       - tree-backend
-#    networks:
-#      - tree
-#networks:
-#  tree:
+    networks:
+      - tree-network
+networks:
+  tree-network:
+    driver: bridge
 
 

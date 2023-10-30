@@ -19,7 +19,7 @@ export default function AddNodePopup(props) {
     const handleSubmit = (e) => {
         let newNode = {value:value, parentId: !isNewRoot ? parentId : null}
         e.preventDefault()
-        callAddNode(newNode, setResponse)
+        callAddNode(newNode, setResponse, props.setData, props.close)
         // setNewRoot(props.treeData, response.modified, props.setData)
     }
 

@@ -103,7 +103,7 @@ export const callDeleteNode = async (nodeId, setData, setError, setLoading) => {
     callApi({method: 'DELETE'}, `http://${serverAdress}:${serverPort}/tree/deleteNode/${nodeId}`, setData, setError, setLoading)
 }
 
-export const callAddNode = (newNode, setResponse) => {
+export const callAddNode = (newNode, setResponse, setTreeData, close) => {
     if (newNode.parentId == null) {
         console.log("Sent node: ", newNode)
         fetch(`http://${serverAdress}:${serverPort}/tree/addNode`, {
@@ -113,6 +113,21 @@ export const callAddNode = (newNode, setResponse) => {
         })
             .then((res) => res.json())
             .then((json) => setResponse(json))
+            .catch((err) => console.log("Send node error: ", err))
+    } else {
+        fetch(`http://${serverAdress}:${serverPort}/tree/addNode`, {
+            method: 'POST', headers: {
+                "Content-Type": "application/json; charset=utf-8"
+            }, body: JSON.stringify(newNode)
+        })
+            .then((res) => res.json())
+            .then((json) => {
+                    let res = translateData(json)
+                    setTreeData(res.tree)
+                    console.log("Updated tree data set: ", res)
+                    close()
+                }
+            )
             .catch((err) => console.log("Send node error: ", err))
     }
 
@@ -135,7 +150,7 @@ export const setNewRoot = (currentTree, newRoot, setTreeData) => {
         .then((json) => {
                 let res = translateData(json)
                 setTreeData(res.tree)
-            console.log("Updated tree data set: ", res)
+                console.log("Updated tree data set: ", res)
             }
         )
         .catch((err) => console.log("Send node error: ", err))

@@ -1,5 +1,4 @@
 import {useCallback, useState} from "react";
-import axios from 'axios';
 
 export const useCenteredTree = (defaultTranslate = {x: 0, y: 0}) => {
     const [translate, setTranslate] = useState(defaultTranslate);
@@ -12,9 +11,6 @@ export const useCenteredTree = (defaultTranslate = {x: 0, y: 0}) => {
     return [translate, containerRef];
 };
 
-let newestReferences;
-let newestPossibleRoots;
-
 export function translateData(treeResponse) {
     console.log(treeResponse)
     // let references = Object.values(treeResponse.references);
@@ -22,7 +18,6 @@ export function translateData(treeResponse) {
     treeResponse.references.forEach(element => {
         references.set(element.id, element.value)
     });
-    newestReferences = references;
     // let references = new Map(Object.entries(treeResponse.references));
     let relations = new Map(Object.entries(treeResponse.relations));
     let leafs = new Map(Object.entries(treeResponse.leafs));
@@ -35,7 +30,7 @@ export function translateData(treeResponse) {
     let visualTreeElems = new Map();
     references.forEach((value, key, map) => {
         // console.log("In map foreach. Key: ", key, " Value: ", value)
-        visualTreeElems.set(key.toString(), {name: value.toString(), attributes: {"id": key.toString(),}, children: []})
+        visualTreeElems.set(key.toString(), {name: value.toString(), attributes: {"id": key.toString(),"parentId":null ,}, children: []})
     })
     console.log("Visual tree elems: ", visualTreeElems)
     let childrenIds = [];   // list of all childrens ID. ID which is not here is a root
@@ -47,6 +42,7 @@ export function translateData(treeResponse) {
             let parent = visualTreeElems.get(parentId.toString())
             // console.log("Parent Id: ", parentId," Parent: ",parent)
             parent.children.push(visualTreeElems.get(childId.toString()))
+            visualTreeElems.get(childId.toString()).attributes.parentId=parentId;
         })
     })
     leafs.forEach((sum, lastNodeId, map) => {
@@ -62,13 +58,13 @@ export function translateData(treeResponse) {
         }
     })
     console.log("Possible roots: ", possibleRoots)
-    newestPossibleRoots = possibleRoots;
     console.log("returned data: ", visualTreeElems.get(possibleRoots.toString()))
     return {tree: visualTreeElems.get(possibleRoots.toString()), modified: treeResponse.modified};
 }
 
 const serverAdress = 'localhost'
 const serverPort = 8080
+
 export const getData = async (setData, setError, setLoading) => {
     callApi({method: 'GET'}, `http://${serverAdress}:${serverPort}/tree/getTree`, setData, setError, setLoading)
 }
@@ -141,10 +137,15 @@ export const setNewRoot = (currentTree, newRoot, setTreeData) => {
         value: parseInt(currentTree.name),
         parentId: newRoot.id
     }
+    callEditNode(oldRootModification, setTreeData)
+
+}
+
+export const callEditNode = (editedNode, setTreeData)=>{
     fetch(`http://${serverAdress}:${serverPort}/tree/editNode`, {
         method: 'PUT', headers: {
             "Content-Type": "application/json; charset=utf-8"
-        }, body: JSON.stringify(oldRootModification)
+        }, body: JSON.stringify(editedNode)
     })
         .then((res) => res.json())
         .then((json) => {

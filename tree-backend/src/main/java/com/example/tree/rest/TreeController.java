@@ -1,5 +1,6 @@
 package com.example.tree.rest;
 
+import com.example.tree.entieties.Node;
 import com.example.tree.service.TreeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +26,17 @@ public class TreeController {
     }
 
     @PostMapping(value = "/addNode", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @CrossOrigin
     public ResponseEntity<TreeResponse> addNode(@RequestBody TreeRequest request) {
-        service.addNode(request);
-        return new ResponseEntity<>(buildResponse(), HttpStatus.CREATED);
+        Node newNode = service.addNode(request);
+        return new ResponseEntity<>(buildResponse(newNode), HttpStatus.CREATED);
     }
 
-    @PostMapping(value = "/editNode", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/editNode", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @CrossOrigin
     public ResponseEntity<TreeResponse> editNode(@RequestBody TreeRequest request) {
-        service.editNode(request);
-        return new ResponseEntity<>(buildResponse(), HttpStatus.OK);
+        Node modified = service.editNode(request);
+        return new ResponseEntity<>(buildResponse(modified), HttpStatus.OK);
     }
 
     @DeleteMapping("/deleteNode/{id}")
@@ -47,6 +50,15 @@ public class TreeController {
                 .references(service.findAll())
                 .relations(service.getAllRelations())
                 .leafs(service.sumAllPaths())
+                .modified(null)
+                .build();
+    }
+    private TreeResponse buildResponse(Node modified){
+        return TreeResponse.builder()
+                .references(service.findAll())
+                .relations(service.getAllRelations())
+                .leafs(service.sumAllPaths())
+                .modified(modified)
                 .build();
     }
 }

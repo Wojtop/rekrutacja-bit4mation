@@ -28,7 +28,7 @@ public class TreeServiceImpl implements TreeService {
 
     @Override
     @Transactional
-    public void addNode(TreeRequest request) {
+    public Node addNode(TreeRequest request) {
         Node newNode = Node.builder().value(request.value()).build();
         newNode = nodeRepository.save(newNode);
 
@@ -43,11 +43,12 @@ public class TreeServiceImpl implements TreeService {
             });
 
         }
+        return newNode;
     }
 
     @Override
     @Transactional
-    public void editNode(TreeRequest request) {
+    public Node editNode(TreeRequest request) {
         Node requestNode = Node.builder().value(request.value()).id(request.nodeId()).build();
 
         // check if node still exists
@@ -78,6 +79,7 @@ public class TreeServiceImpl implements TreeService {
                 throw new TreeException("New parent node does not exists. Check refreshed tree");
             });
         }
+        return requestNode;
     }
 
     @Override

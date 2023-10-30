@@ -1,12 +1,13 @@
 import React from "react";
 import Tree from "react-d3-tree";
 import "./App.css";
-import {useCenteredTree} from "./helpers";
+import {useCenteredTree, callAddNode} from "./helpers";
 import {useState, useEffect} from "react";
 
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import ActionsPopup from "./ActionsPopup";
+import AddNodePopup from "./AddNodePopup";
 import {translateData, getData} from "./helpers";
 
 const containerStyles = {
@@ -45,7 +46,8 @@ const renderRectSvgNode = ({nodeDatum, setData, setError, setLoading}) => (
             close => (
                 <div className='modal'>
                     <div className='content'>
-                        <ActionsPopup nodeDatum={nodeDatum} setData={setData} setError={setError} setLoading={setLoading}/>
+                        <ActionsPopup nodeDatum={nodeDatum} setData={setData} setError={setError}
+                                      setLoading={setLoading}/>
                     </div>
                     <div>
                         <button onClick=
@@ -65,6 +67,10 @@ export default function App() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // const createNode = function (){
+    //     callAddNode( ,setData, setError, setLoading)
+    // }
+
     useEffect(() => {
         getData(setData, setError, setLoading)
     }, []);
@@ -76,15 +82,37 @@ export default function App() {
             {error && (
                 <div>{`There is a problem fetching the post data - ${error}`}</div>
             )}
-            {data && <Tree
-                data={data}
-                translate={translate}
-                // renderCustomNodeElement={renderRectSvgNode}
-                renderCustomNodeElement={(rd3tProps) =>
-                    renderRectSvgNode({ ...rd3tProps, setData, setError, setLoading })
-                }
-                orientation="vertical"
-            />}
+            {data &&
+                <span>
+                    <Popup trigger={
+                        <button name={"createButton"}
+                            // onClick={()=>createNode()}
+                        >
+                            Create new node
+                        </button>
+                    } modal nested>
+                        {
+                            close=> (
+                                <div>
+                                    <AddNodePopup setData={setData} setError={setError}
+                                              setLoading={setLoading} treeData={data} close={close}/>
+                                </div>
+                            )
+                        }
+
+                    </Popup>
+
+                    <Tree
+                        data={data}
+                        translate={translate}
+                        renderCustomNodeElement={(rd3tProps) =>
+                            renderRectSvgNode({...rd3tProps, setData, setError, setLoading})
+                        }
+                        orientation="vertical"
+                    />
+
+                </span>
+            }
         </div>
     );
 }

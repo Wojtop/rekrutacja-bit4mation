@@ -8,7 +8,9 @@ import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import ActionsPopup from "./ActionsPopup";
 import AddNodePopup from "./AddNodePopup";
-import {translateData, getData} from "./helpers";
+import {getData} from "./helpers";
+
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 
 const containerStyles = {
     width: "100vw",
@@ -17,7 +19,7 @@ const containerStyles = {
 
 // Here we're using `renderCustomNodeElement` to represent each node
 // as an SVG `rect` instead of the default `circle`.
-const renderRectSvgNode = ({nodeDatum, setData, setError, setLoading}) => (
+const renderRectSvgNode = ({nodeDatum, setData, setLoading}) => (
     <Popup trigger={
         <g>
             <circle r="10" onClick={() => {
@@ -46,7 +48,7 @@ const renderRectSvgNode = ({nodeDatum, setData, setError, setLoading}) => (
             close => (
                 <div className='modal'>
                     <div className='content'>
-                        <ActionsPopup nodeDatum={nodeDatum} setData={setData} setError={setError}
+                        <ActionsPopup nodeDatum={nodeDatum} setData={setData}
                                       setLoading={setLoading}/>
                     </div>
                     <div>
@@ -60,53 +62,65 @@ const renderRectSvgNode = ({nodeDatum, setData, setError, setLoading}) => (
         }
     </Popup>
 );
+
+export const createNotification = (type, message) => {
+    console.log(type, typeof (type))
+    if (type == 'info') {
+        NotificationManager.info(message);
+    } else if (type == 'success') {
+        NotificationManager.success(message, 'Operation success');
+    } else if (type == 'warning') {
+        NotificationManager.warning(message, 'Warning');
+    } else if (type == 'error') {
+        NotificationManager.error(message, "Operation failed");
+    } else {
+        console.log("default case")
+    }
+}
+
 export default function App() {
     const [translate, containerRef] = useCenteredTree();
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
-    // const createNode = function (){
-    //     callAddNode( ,setData, setError, setLoading)
-    // }
 
     useEffect(() => {
-        getData(setData, setError, setLoading)
+        getData(setData, setLoading)
     }, []);
 
     // console.log("Data2: ", data)
     return (
         <div style={containerStyles} ref={containerRef}>
+            {/*<button className='btn btn-success'*/}
+            {/*        onClick={createNotification('success', 'test')}>Success*/}
+            {/*</button>*/}
+            <NotificationContainer/>
             {loading && <div>Data fetching...</div>}
-            {error && (
-                <div>{`There is a problem fetching the post data - ${error}`}</div>
-            )}
+            <Popup trigger={
+                <button name={"createButton"}
+                    // onClick={()=>createNode()}
+                >
+                    Create new node
+                </button>
+            } modal nested>
+                {
+                    close => (
+                        <div>
+                            <AddNodePopup setData={setData}
+                                          setLoading={setLoading} treeData={data} close={close}/>
+                        </div>
+                    )
+                }
+
+            </Popup>
             {data &&
                 <span>
-                    <Popup trigger={
-                        <button name={"createButton"}
-                            // onClick={()=>createNode()}
-                        >
-                            Create new node
-                        </button>
-                    } modal nested>
-                        {
-                            close=> (
-                                <div>
-                                    <AddNodePopup setData={setData} setError={setError}
-                                              setLoading={setLoading} treeData={data} close={close}/>
-                                </div>
-                            )
-                        }
-
-                    </Popup>
-
-                    <Tree
+                                        <Tree
                         data={data}
                         translate={translate}
                         renderCustomNodeElement={(rd3tProps) =>
-                            renderRectSvgNode({...rd3tProps, setData, setError, setLoading})
+                            renderRectSvgNode({...rd3tProps, setData, setLoading})
                         }
                         orientation="vertical"
                     />

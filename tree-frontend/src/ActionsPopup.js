@@ -9,7 +9,7 @@ export default function ActionsPopup(props) {
     const nodeDatum = props.nodeDatum;
     const deleteNode = function (nodeId) {
         console.log("Delete node: ", nodeId)
-        callDeleteNode(nodeId, props.setData, props.setError, props.setLoading)
+        callDeleteNode(nodeId, props.setData, props.setLoading)
     }
 
     const [newValue, setNewValue] = React.useState(nodeDatum.name)

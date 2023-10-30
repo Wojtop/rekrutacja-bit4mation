@@ -3,7 +3,8 @@ import "./App.css";
 
 import 'reactjs-popup/dist/index.css';
 import {callAddNode, setNewRoot} from "./helpers";
-
+import 'react-notifications/lib/notifications.css';
+import {createNotification} from "./App";
 
 export default function AddNodePopup(props) {
     const [isNewRoot, setIsNewRoot] = React.useState(false);
@@ -27,9 +28,10 @@ export default function AddNodePopup(props) {
         console.log("Response is not null: ", response)
 
         console.log("Modified: ", modified)
-        setNewRoot(props.treeData, response.modified, props.setData)
+        setNewRoot(props.treeData, response.modified, props.setData, props.setLoading)
         setResponse(null)
         props.close()
+        createNotification("success", "New node created")
     }
 
     return (

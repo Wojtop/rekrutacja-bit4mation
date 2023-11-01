@@ -64,7 +64,8 @@ alter table connections
     add
         constraint fk_node_child
             foreign key (child_id)
-                references nodes,
+                references nodes
+                on delete cascade,
     add
         constraint fk_node_parent
             foreign key (parent_id)

@@ -1,16 +1,8 @@
-INSERT INTO public.nodes (value) VALUES (10);
-INSERT INTO public.nodes (value) VALUES (11);
-INSERT INTO public.nodes (value) VALUES (12);
-INSERT INTO public.nodes (value) VALUES (13);
-INSERT INTO public.nodes (value) VALUES (14);
-INSERT INTO public.nodes (value) VALUES (11);
-INSERT INTO public.nodes (value) VALUES (112);
-INSERT INTO public.nodes (value) VALUES (131);
-
-INSERT INTO public.connections (child_id, parent_id) VALUES (6, 1);
-INSERT INTO public.connections (child_id, parent_id) VALUES (7, 6);
-INSERT INTO public.connections (child_id, parent_id) VALUES (8, 7);
-INSERT INTO public.connections (child_id, parent_id) VALUES (9, 8);
-INSERT INTO public.connections (child_id, parent_id) VALUES (10, 6);
-INSERT INTO public.connections (child_id, parent_id) VALUES (11, 10);
-INSERT INTO public.connections (child_id, parent_id) VALUES (12, 8);
+INSERT INTO public.nodes (id, value) VALUES (1, 100);
+INSERT INTO public.nodes (id, value) VALUES (2, 110);
+INSERT INTO public.nodes (id, value) VALUES (3, 111);
+INSERT INTO public.nodes (id, value) VALUES (4, 112);
+INSERT INTO public.nodes (id, value) VALUES (5, 120);
+INSERT INTO public.nodes (id, value) VALUES (6, 121);
+INSERT INTO public.nodes (id, value) VALUES (7, 122);
+INSERT INTO public.nodes (id, value) VALUES (8, 130);

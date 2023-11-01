@@ -18,7 +18,6 @@ public class Connection {
     private int id;
     @ManyToOne
     @NotNull
-//    @JoinColumn( name = "id",nullable = true)
     private Node parent = null;
     @OneToOne
     @NotNull

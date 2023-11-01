@@ -51,10 +51,14 @@ public class TreeServiceImpl implements TreeService {
     public Node editNode(TreeRequest request) {
         Node requestNode = Node.builder().value(request.value()).id(request.nodeId()).build();
 
+        if(request.nodeId() == null){
+            throw new TreeException("Edited node ID can not be null");
+        }
+
         // check if node still exists
         nodeRepository.findById(request.nodeId()).orElseThrow(() -> {
             log.error("No such node: {}", request.nodeId());
-            throw new TreeException("Node no longer exists. Check refreshed tree");
+            return new TreeException("Node no longer exists. Check refreshed tree");
         });
         requestNode = nodeRepository.save(requestNode);
         log.info("Node {} updated", requestNode);

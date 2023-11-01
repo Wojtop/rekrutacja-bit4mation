@@ -7,7 +7,7 @@ import java.util.Set;
 
 /**
  * @param nodeId   ID of node associated with request.
- *                 <b>NULL</b> if request is new node creation.
+ *                 <b>NULL</b> only if request is new node creation.
  * @param value    New value of edited/created node
  * @param parentId ID of node parent node.
  *                 <b>NULL</b> if node is new root.

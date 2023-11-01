@@ -1,12 +1,8 @@
 package com.example.tree.entieties;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
 
 @Entity
 @Table(name="nodes")
@@ -22,6 +18,7 @@ public class Node{
     @Column(name = "id")
     private Integer id = null;
 
+    @NotNull
     private Integer value = 0;
 
     @Override

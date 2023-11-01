@@ -29,6 +29,13 @@ public class TreeServiceImpl implements TreeService {
     @Override
     @Transactional
     public Node addNode(TreeRequest request) {
+        if(request.nodeId() != null){
+            throw new TreeException("New node can not have assigned ID");
+        }
+        if(request.value() == null){
+            throw new TreeException("Value can not be null");
+        }
+
         Node newNode = Node.builder().value(request.value()).build();
         newNode = nodeRepository.save(newNode);
 
@@ -49,11 +56,13 @@ public class TreeServiceImpl implements TreeService {
     @Override
     @Transactional
     public Node editNode(TreeRequest request) {
-        Node requestNode = Node.builder().value(request.value()).id(request.nodeId()).build();
-
         if(request.nodeId() == null){
             throw new TreeException("Edited node ID can not be null");
         }
+        if(request.value() == null){
+            throw new TreeException("Value can not be null");
+        }
+        Node requestNode = Node.builder().value(request.value()).id(request.nodeId()).build();
 
         // check if node still exists
         nodeRepository.findById(request.nodeId()).orElseThrow(() -> {
@@ -106,18 +115,14 @@ public class TreeServiceImpl implements TreeService {
     }
 
     @Override
-    public Map<Integer, Iterable<Integer>> getAllRelations() {
+    public Map<Integer, Set<Integer>> getAllRelations() {
         Iterable<Connection> connections = connectionRepository.findAll();
         Map<Integer, Set<Integer>> connectionsMap = new HashMap<>();
         for (Connection connection : connections) {
             Set<Integer> nodeChildren = connectionsMap.computeIfAbsent(connection.getParent().getId(), k -> new HashSet<>());
             nodeChildren.add(connection.getChild().getId());
         }
-        Map<Integer, Iterable<Integer>> converted = new HashMap<>();
-        for (Integer k : connectionsMap.keySet()) {
-            converted.put(k, (Iterable<Integer>) connectionsMap.get(k));
-        }
-        return converted;
+        return connectionsMap;
     }
 
     private Optional<Connection> findChildByChildId(int childId) {
@@ -130,7 +135,7 @@ public class TreeServiceImpl implements TreeService {
     }
 
     @Override
-    public Iterable<Node> findAll() {
+    public List<Node> findAll() {
         return nodeRepository.findAll();
     }
 

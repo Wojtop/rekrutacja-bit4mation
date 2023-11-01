@@ -2,7 +2,7 @@ create table nodes
 (
     id INT GENERATED ALWAYS AS IDENTITY
         primary key,
-    value INT
+    value INT NOT NULL DEFAULT 0
 );
 
 alter table nodes
@@ -11,8 +11,8 @@ alter table nodes
 create table connections
 (
     id INT GENERATED ALWAYS AS IDENTITY,
-    child_id  INT,
-    parent_id INT,
+    child_id  INT NOT NULL,
+    parent_id INT NOT NULL,
 
     constraint child_unique unique (child_id),
     constraint fk_node_child

@@ -1,5 +1,6 @@
 package com.example.tree.entieties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -16,9 +17,11 @@ public class Node{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @Schema(description = "ID of node", required = true)
     private Integer id = null;
 
     @NotNull
+    @Schema(description = "Value of node", required = true)
     private Integer value = 0;
 
     @Override

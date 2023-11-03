@@ -53,10 +53,10 @@ alter table nodes
     add constraint pk
         primary key (id);
 alter table nodes
-    alter column id add GENERATED ALWAYS AS IDENTITY;
+    alter column id add GENERATED ALWAYS AS IDENTITY (START WITH 100 increment by 1);
 
 alter table connections
-    alter column id add GENERATED ALWAYS AS IDENTITY ;
+    alter column id add GENERATED ALWAYS AS IDENTITY (START WITH 100 increment by 1);
 
 alter table connections
     add

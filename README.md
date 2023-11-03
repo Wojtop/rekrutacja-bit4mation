@@ -5,6 +5,8 @@ Suggested form for launching project is to launch it with docker.
 
 To launch type `docker compose up -d` in project directory (where `docker-compose.yml` is located).
 
+Before start using application wait few moments until all dependencies will download and backend application will start (in backend container logs check if spring application has already started).
+
 ##### In case of error 
 ```agsl
 => ERROR [5/6] RUN ./mvnw dependency:resolve                                                                              0.4s 
@@ -14,6 +16,7 @@ To launch type `docker compose up -d` in project directory (where `docker-compos
 ```
 
 If you face this error make sure that file `tree-backend/mvnw` has ***LF line endings***.
+
 ### Launching outside docker
 
 Launching project outside docker requires maven, postgres and Node.js.

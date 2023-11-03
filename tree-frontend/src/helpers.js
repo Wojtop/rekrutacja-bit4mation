@@ -77,7 +77,15 @@ export const getData = async (setData, setLoading) => {
 export const callApi = async (postParams, url, setData, setLoading) => {
     fetch(url, postParams)
         .then((response) => {
-            return response.json(); // Parse the response data as JSON
+            if(response.ok){
+                return response.json(); // Parse the response data as JSON
+            }
+            else {
+                response.json().then((text)=>{
+                    console.log("New root send response: ", response)
+                    createNotification("error", `${response.status}: ${text.message}`)
+                })
+            }
         })
         .then((actualData) => {
             let temp = translateData(actualData)
@@ -86,7 +94,8 @@ export const callApi = async (postParams, url, setData, setLoading) => {
             setData(actualData);
         })
         .catch((err) => {
-            createNotification('error', `${err.code}: ${err.message}`)
+            console.log(err)
+            createNotification('error', `Frontend application error`)
         })
         .finally(() => {
             setLoading(false);
@@ -107,13 +116,23 @@ export const callAddNode = (newNode, setResponse, setTreeData, close) => {
                 "Content-Type": "application/json; charset=utf-8"
             }, body: JSON.stringify(newNode)
         })
-            .then((res) => res.json())
+            .then((res) => {
+                if(res.ok){
+                    return res.json()
+                }
+                else{
+                    res.json().then((text)=>{
+                        console.log("New root send response: ", res)
+                        createNotification("error", `${res.status}: ${text.message}`)
+                    })
+                }
+            })
             .then((json) => {setResponse(json)
                 createNotification("success", `New root created`)
             })
             .catch((err) => {
-                console.log("New root send error: ", err)
-                createNotification("error", `${err.code}: ${err.message}`)
+                console.log(err)
+                createNotification('error', `Frontend application error`)
             })
     } else {
         fetch(`http://${serverAdress}:${serverPort}/tree/addNode`, {
@@ -121,7 +140,17 @@ export const callAddNode = (newNode, setResponse, setTreeData, close) => {
                 "Content-Type": "application/json; charset=utf-8"
             }, body: JSON.stringify(newNode)
         })
-            .then((res) => res.json())
+            .then((res) => {
+                if(res.ok){
+                    return res.json()
+                }
+                else {
+                    res.json().then((text)=>{
+                        console.log("New root send response: ", res)
+                        createNotification("error", `${res.status}: ${text.message}`)
+                    })
+                }
+            })
             .then((json) => {
                     let res = translateData(json)
                     setTreeData(res.tree)
@@ -131,8 +160,8 @@ export const callAddNode = (newNode, setResponse, setTreeData, close) => {
                 }
             )
             .catch((err) => {
-                console.log("Send new node error: ", err)
-                createNotification("error", `${err.code}: ${err.message}`)
+                console.log(err)
+                createNotification('error', `Frontend application error`)
             })
     }
 
@@ -161,7 +190,17 @@ export const callEditNode = (editedNode, setTreeData) => {
             "Content-Type": "application/json; charset=utf-8"
         }, body: JSON.stringify(editedNode)
     })
-        .then((res) => res.json())
+        .then((res) => {
+            if(res.ok){
+                return res.json()
+            }
+            else{
+                res.json().then((text)=>{
+                    console.log("New root send response: ", res)
+                    createNotification("error", `${res.status}: ${text.message}`)
+                })
+            }
+        })
         .then((json) => {
                 let res = translateData(json)
                 setTreeData(res.tree)
@@ -170,7 +209,7 @@ export const callEditNode = (editedNode, setTreeData) => {
             }
         )
         .catch((err) => {
-            console.log("Send node error: ", err)
-            createNotification("error", `${err.code}: ${err.message}`)
+            console.log(err)
+            createNotification('error', `Frontend application error`)
         })
 }

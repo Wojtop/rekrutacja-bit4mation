@@ -15,7 +15,7 @@ services:
       - tree-network
 
   tree-backend:
-    build: /tree-backend
+    build: ./tree-backend
     container_name: tree-backend
     ports:
       - "8080:8080"
@@ -25,7 +25,7 @@ services:
       - tree-network
 
   tree-frontend:
-    build: /tree-frontend
+    build: ./tree-frontend
     container_name: tree-frontend
     ports:
       - "3000:3000"

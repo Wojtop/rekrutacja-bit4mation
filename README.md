@@ -5,6 +5,15 @@ Suggested form for launching project is to launch it with docker.
 
 To launch type `docker compose up -d` in project directory (where `docker-compose.yml` is located).
 
+##### In case of error 
+```agsl
+=> ERROR [5/6] RUN ./mvnw dependency:resolve                                                                              0.4s 
+------
+ > [5/6] RUN ./mvnw dependency:resolve:
+#0 0.376 /bin/sh: 1: ./mvnw: not found
+```
+
+If you face this error make sure that file `tree-backend/mvnw` has ***LF line endings***.
 ### Launching outside docker
 
 Launching project outside docker requires maven, postgres and Node.js.
